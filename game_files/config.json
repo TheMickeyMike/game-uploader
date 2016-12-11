@@ -1,0 +1,26 @@
+{
+  "config_version": "1.0",
+  "data": {
+    "name": "Upladed Game 1",
+    "description": "Superrrr NOWA gra",
+    "author": "maciej",
+    "version": "1.0.1",
+    "robot_model": "EV3",
+    "robot_system": "LEJOS",
+    "lego_construction": "1",
+    "game_requirements": {
+      "system_version": "0.9.1",
+      "sensors": {
+        "color_sensor": 1,
+        "gyro_sensor": 1,
+        "infrared_sensor": 1,
+        "ultrasonic_sensor": 1,
+        "touch_sensor": 1
+      },
+      "motors": {
+        "big_motor": 1,
+        "middle_motor": 1
+      }
+    }
+  }
+}
