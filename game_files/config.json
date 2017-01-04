@@ -11,16 +11,16 @@
     "game_requirements": {
       "system_version": "0.9.1",
       "sensor_ports": {
-        "1": "CS",
-        "2": "GS",
-        "3": "IS",
-        "4": "US"
+        "1": "color_sensor",
+        "2": "gyro_sensor",
+        "3": "infrared_sensor",
+        "4": "ultrasonic_sensor"
       },
       "motor_ports": {
-        "A": "BM",
-        "B": "MM",
-        "C": "MM",
-        "D": "BM"
+        "A": "big_motor",
+        "B": "middle_motor",
+        "C": "middle_motor",
+        "D": "big_motor"
       }
     }
   }
