@@ -10,16 +10,17 @@
     "lego_construction": "1",
     "game_requirements": {
       "system_version": "0.9.1",
-      "sensors": {
-        "color_sensor": 1,
-        "gyro_sensor": 1,
-        "infrared_sensor": 1,
-        "ultrasonic_sensor": 1,
-        "touch_sensor": 1
+      "sensor_ports": {
+        "1": "CS",
+        "2": "GS",
+        "3": "IS",
+        "4": "US"
       },
-      "motors": {
-        "big_motor": 1,
-        "middle_motor": 1
+      "motor_ports": {
+        "A": "BM",
+        "B": "MM",
+        "C": "MM",
+        "D": "BM"
       }
     }
   }
