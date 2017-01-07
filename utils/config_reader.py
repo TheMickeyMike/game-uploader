@@ -13,13 +13,13 @@ logger = logging.getLogger('game-uploader')
 class ConfigTranslator_1_0:
     def __init__(self, obj):
         self.system_version = obj['data']['game_requirements']['system_version']
-        self.sensor_port_1 = self.validate_sensor(obj['data']['game_requirements']['sensor_ports']['1'])
-        self.sensor_port_2 = self.validate_sensor(obj['data']['game_requirements']['sensor_ports']['2'])
-        self.sensor_port_3 = self.validate_sensor(obj['data']['game_requirements']['sensor_ports']['3'])
-        self.sensor_port_4 = self.validate_sensor(obj['data']['game_requirements']['sensor_ports']['4'])
-        self.motor_port_1 = self.validate_motor(obj['data']['game_requirements']['motor_ports']['A'])
-        self.motor_port_2 = self.validate_motor(obj['data']['game_requirements']['motor_ports']['B'])
-        self.motor_port_3 = self.validate_motor(obj['data']['game_requirements']['motor_ports']['C'])
+        self.sensor_port_1 = self.validate_sensor(obj['data']['game_requirements']['sensor_ports'].get('1', 'NONE'))
+        self.sensor_port_2 = self.validate_sensor(obj['data']['game_requirements']['sensor_ports'].get('2', 'NONE'))
+        self.sensor_port_3 = self.validate_sensor(obj['data']['game_requirements']['sensor_ports'].get('3', 'NONE'))
+        self.sensor_port_4 = self.validate_sensor(obj['data']['game_requirements']['sensor_ports'].get('4', 'NONE'))
+        self.motor_port_1 = self.validate_motor(obj['data']['game_requirements']['motor_ports'].get('A', 'NONE'))
+        self.motor_port_2 = self.validate_motor(obj['data']['game_requirements']['motor_ports'].get('B', 'NONE'))
+        self.motor_port_3 = self.validate_motor(obj['data']['game_requirements']['motor_ports'].get('C', 'NONE'))
         self.string_for_hash = self.system_version + self.sensor_port_1 + self.sensor_port_2 + \
                                                       self.sensor_port_3 + self.sensor_port_4 + self.motor_port_1 + \
                                                       self.motor_port_2 + self.motor_port_3
@@ -28,14 +28,14 @@ class ConfigTranslator_1_0:
                                self.motor_port_2 + self.motor_port_3
 
     def validate_sensor(self, value):
-        valid_sensors = ['color_sensor', 'gyro_sensor', 'infrared_sensor', 'ultrasonic_sensor', 'touch_sensor']
+        valid_sensors = ['NONE', 'color_sensor', 'gyro_sensor', 'infrared_sensor', 'ultrasonic_sensor', 'touch_sensor']
         if value in valid_sensors:
             return value
         else:
             raise Exception('Valid value for this field {}, your value: {}'.format(valid_sensors, value))
 
     def validate_motor(self, value):
-        valid_motors = ['big_motor', 'middle_motor']
+        valid_motors = ['NONE', 'big_motor', 'middle_motor']
         if value in valid_motors:
             return value
         else:
@@ -64,12 +64,12 @@ class ConfigTranslatorNXT_1_0(ConfigTranslator_1_0):
 class ConfigTranslatorEV3_1_0(ConfigTranslator_1_0):
     def __init__(self, obj):
         super().__init__(obj)
-        self.motor_port_4 = self.validate_motor(obj['data']['game_requirements']['motor_ports']['D'])
+        self.motor_port_4 = self.validate_motor(obj['data']['game_requirements']['motor_ports'].get('D', 'NONE'))
 
     def get_hash(self):
         self.string_for_hash = self.string_for_hash + self.motor_port_4
         game_requirements_hash = hashlib.md5(self.string_for_hash.encode('utf-8')).hexdigest()
-        logger.info("Construction Requirements Hash: {}".format(game_requirements_hash))
+        logger.info("Game Requirements Hash: {} for system version: {}".format(game_requirements_hash, self.system_version))
         return game_requirements_hash
 
     def get_construction_hash(self):

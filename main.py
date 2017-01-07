@@ -41,5 +41,6 @@ else:
     exit(1)
 print('Checking constructions configs...')
 game_config.lego_construction = robot_client.contruction_helper(model=game_config.robot_model, const_hash=const_hash)
+logger.debug(game_config.__dict__)
 config = game_config.__dict__
 robot_client.upload_game(config)

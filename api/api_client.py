@@ -98,18 +98,20 @@ class RobotServiceClient(RobotServiceTokenProvider):
         )
         if req.status_code == 200:
             data = req.json()
-            logger.info('Construction for hash {} found: '.format(const_hash, json.dumps(data, indent=4, sort_keys=True)))
-            print('Found {} for construction hash {}.'.format(data['name'], const_hash))
+            logger.debug('Construction for hash {} found.\n{}'.format(const_hash, json.dumps(data, indent=4, sort_keys=True)))
+            print('Found construction for hash {} \nUsing construction: "{}"'.format(const_hash, data['name']))
             return data['id']
         if req.status_code == 404:
-            logger.info('Construction for hash {} not found. Trying creating one.'.format(const_hash))
-            print('Construction for hash {} not found. Trying creating one.'.format(const_hash))
-            req_in_json = '{req in json}'
-            data = {
-                'requirements': req_in_json,
-                'config': const_hash
-            }
-            construction_config_id = self.create_new_construction_config(data)
+            construction_config_id = self.construction_config_fallback(const_hash)
+            if not construction_config_id:
+                logger.debug('Construction for hash {} not found. Trying creating one.'.format(const_hash))
+                print('Construction for hash {} not found. Trying creating one.'.format(const_hash))
+                req_in_json = '{req in json}'
+                data = {
+                    'requirements': req_in_json,
+                    'config': const_hash
+                }
+                construction_config_id = self.create_new_construction_config(data)
             construction_name = input('Please provide name for new construction: ')
             construction_info = input('Please provide some information for this construction: ')
             new_construction = {
@@ -119,12 +121,14 @@ class RobotServiceClient(RobotServiceTokenProvider):
                 'config': construction_config_id
             }
             new_construction_obj = self.create_new_construction(new_construction)
-            logger.info(json.dumps(new_construction_obj, indent=4, sort_keys=True))
-            print('Construction created.')
             return new_construction_obj['id']
+        else:
+            logger.error('Error while fetching construction for hash {} | Response: {}'.format(const_hash, req.json()))
+            raise Exception('Error while fetching construction for hash {}'.format(const_hash))
 
     def create_new_construction(self, data):
-        logger.info('Trying creating new construction {}'.format(data))
+        print('Creating new construction...')
+        logger.debug('Trying creating new construction {}'.format(data))
         req = requests.post(
             self.get_url(endpoint=Urls.UPLOAD_CONFIG_HASH),
             headers=self.HEADERS,
@@ -132,13 +136,18 @@ class RobotServiceClient(RobotServiceTokenProvider):
         )
         if req.status_code == 200:
             data = req.json()
-            logger.info('Construction created {}'.format(json.dumps(data, indent=4, sort_keys=True)))
+            logger.debug('Construction created {}'.format(json.dumps(data, indent=4, sort_keys=True)))
+            print('Construction created. ID: {}'.format(data['id']))
             logger.debug(data)
             return data
+        else:
+            logger.error('Error while creating new construction {} | Response: {}'.format(data, req.json()))
+            raise Exception('Error while creating new construction {}'.format(data))
 
 
     def create_new_construction_config(self, data):
-        logger.info('Trying creating construction config {}'.format(data))
+        print('Creating new construction configs...')
+        logger.debug('Trying creating construction config {}'.format(data))
         req = requests.post(
             self.get_url(endpoint=Urls.CONSTRUCTION_HASH),
             headers=self.HEADERS,
@@ -146,5 +155,27 @@ class RobotServiceClient(RobotServiceTokenProvider):
         )
         if req.status_code == 200:
             data = req.json()
-            logger.info('Construction config created {}'.format(json.dumps(data, indent=4, sort_keys=True)))
+            logger.error('Construction config created {}'.format(json.dumps(data, indent=4, sort_keys=True)))
+            print('Construction config created id: {}'.format(data['id']))
             return data['id']
+        else:
+            logger.error('Error while creating new construction config {} | Response: {}'.format(data, req.json()))
+            raise Exception('Error while creating new construction config {}'.format(data))
+
+    def construction_config_fallback(self, construction_hash):
+        req = requests.get(
+            self.get_url(endpoint=Urls.CONSTRUCTION_CONFIG_FALLBACK, id=construction_hash),
+            headers={'Accept': 'application/json'}
+        )
+        if req.status_code == 200:
+            data = req.json()
+            logger.debug('[FALLBACK] Construction config for hash {} found.\n{}'.format(construction_hash, json.dumps(data, indent=4, sort_keys=True)))
+            print('Found construction config with id {} for hash {} '.format(data['id'], construction_hash))
+            return data['id']
+        if req.status_code == 404:
+            logger.debug('[FALLBACK] Construction config for hash {} not found.'.format(construction_hash))
+            return None
+        else:
+            logger.error('Error while fetching construction config fallback {} | Response: {}'
+                         .format(construction_hash, req.json()))
+            raise Exception('Error while fetching construction config fallback {} '.format(construction_hash))
