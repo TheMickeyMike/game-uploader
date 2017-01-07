@@ -27,7 +27,7 @@ logger.addHandler(ch)
 
 print('\nReading config file...')
 game_config = ConfigReader
-game_config = game_config.map_config_file_to_game_obj()
+game_config, const_hash = game_config.map_config_file_to_game_obj()
 print('Config file well formatted\n')
 print('Please log in to finalize your uploading.')
 username = input('Username: ')
@@ -39,5 +39,8 @@ else:
     logger.info('Author {} username {} [FAIL]'.format(game_config.author, robot_client.username))
     print('Please correct author to your username')
     exit(1)
+print('Checking constructions configs...')
+game_config.lego_construction = robot_client.contruction_helper(model=game_config.robot_model, const_hash=const_hash)
+logger.debug(game_config.__dict__)
 config = game_config.__dict__
 robot_client.upload_game(config)

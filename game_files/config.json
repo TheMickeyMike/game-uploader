@@ -1,25 +1,25 @@
 {
   "config_version": "1.0",
   "data": {
-    "name": "Upladed Game 1",
-    "description": "Superrrr NOWA gra",
+    "name": "Tic Tac Toe",
+    "description": "Omega Studio presents new classic game series, tic tac toe",
     "author": "maciej",
     "version": "1.0.1",
     "robot_model": "EV3",
     "robot_system": "LEJOS",
-    "lego_construction": "1",
     "game_requirements": {
       "system_version": "0.9.1",
-      "sensors": {
-        "color_sensor": 1,
-        "gyro_sensor": 1,
-        "infrared_sensor": 1,
-        "ultrasonic_sensor": 1,
-        "touch_sensor": 1
+      "sensor_ports": {
+        "1": "color_sensor",
+        "2": "infrared_sensor",
+        "3": "ultrasonic_sensor",
+        "4": "touch_sensor"
       },
-      "motors": {
-        "big_motor": 1,
-        "middle_motor": 1
+      "motor_ports": {
+        "A": "big_motor",
+        "B": "big_motor",
+        "C": "middle_motor",
+        "D": "big_motor"
       }
     }
   }

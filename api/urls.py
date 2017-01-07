@@ -8,3 +8,6 @@ class Urls(Enum):
     BASE_URL = 'http://s396393.vm.wmi.amu.edu.pl'
     AUTH = 'oauth/token'
     GAMES_VAULT = 'games/vault/upload'
+    CONSTRUCTION_HASH = 'robots/config'
+    UPLOAD_CONFIG_HASH = 'robots/constructions'
+    CONSTRUCTION_CONFIG_FALLBACK = 'robots/lego/constructions/requirements'

@@ -28,7 +28,7 @@ class RobotServiceTokenProvider(object):
     def get_url(self, endpoint, id=None, filters=None):
         url = "{}/api/{}".format(Urls.BASE_URL, endpoint)
         if id:
-            url += '{}/'.format(id)
+            url += '/{}'.format(id)
         if filters:
             url += '?{}'.format(urllib.parse.urlencode(filters))
         return url
@@ -89,3 +89,93 @@ class RobotServiceClient(RobotServiceTokenProvider):
         else:
             logger.error("Response status code: {} | Message: {}".format(response.status_code, response.content))
             exit(1)
+
+    def contruction_helper(self,const_hash, model):
+        path = '{}/{}'.format(model, const_hash)
+        req = requests.get(
+            self.get_url(endpoint=Urls.CONSTRUCTION_HASH, id=path),
+            headers={'Accept': 'application/json'}
+        )
+        if req.status_code == 200:
+            data = req.json()
+            logger.debug('Construction for hash {} found.\n{}'.format(const_hash, json.dumps(data, indent=4, sort_keys=True)))
+            print('Found construction for hash {} \nUsing construction: "{}"'.format(const_hash, data['name']))
+            return data['id']
+        if req.status_code == 404:
+            construction_config_id = self.construction_config_fallback(const_hash)
+            if not construction_config_id:
+                logger.debug('Construction for hash {} not found. Trying creating one.'.format(const_hash))
+                print('Construction for hash {} not found. Trying creating one.'.format(const_hash))
+                req_in_json = '{req in json}'
+                data = {
+                    'requirements': req_in_json,
+                    'config': const_hash
+                }
+                construction_config_id = self.create_new_construction_config(data)
+            construction_name = input('Please provide name for new construction: ')
+            construction_info = input('Please provide some information for this construction: ')
+            new_construction = {
+                'robot_model': model,
+                'name': construction_name,
+                'info': construction_info,
+                'config': construction_config_id
+            }
+            new_construction_obj = self.create_new_construction(new_construction)
+            return new_construction_obj['id']
+        else:
+            logger.error('Error while fetching construction for hash {} | Response: {}'.format(const_hash, req.json()))
+            raise Exception('Error while fetching construction for hash {}'.format(const_hash))
+
+    def create_new_construction(self, data):
+        print('Creating new construction...')
+        logger.debug('Trying creating new construction {}'.format(data))
+        req = requests.post(
+            self.get_url(endpoint=Urls.UPLOAD_CONFIG_HASH),
+            headers=self.HEADERS,
+            data  = json.dumps(data)
+        )
+        if req.status_code == 200:
+            data = req.json()
+            logger.debug('Construction created {}'.format(json.dumps(data, indent=4, sort_keys=True)))
+            print('Construction created. ID: {}'.format(data['id']))
+            logger.debug(data)
+            return data
+        else:
+            logger.error('Error while creating new construction {} | Response: {}'.format(data, req.json()))
+            raise Exception('Error while creating new construction {}'.format(data))
+
+
+    def create_new_construction_config(self, data):
+        print('Creating new construction configs...')
+        logger.debug('Trying creating construction config {}'.format(data))
+        req = requests.post(
+            self.get_url(endpoint=Urls.CONSTRUCTION_HASH),
+            headers=self.HEADERS,
+            data=json.dumps(data)
+        )
+        if req.status_code == 200:
+            data = req.json()
+            logger.error('Construction config created {}'.format(json.dumps(data, indent=4, sort_keys=True)))
+            print('Construction config created id: {}'.format(data['id']))
+            return data['id']
+        else:
+            logger.error('Error while creating new construction config {} | Response: {}'.format(data, req.json()))
+            raise Exception('Error while creating new construction config {}'.format(data))
+
+    def construction_config_fallback(self, construction_hash):
+        req = requests.get(
+            self.get_url(endpoint=Urls.CONSTRUCTION_CONFIG_FALLBACK, id=construction_hash),
+            headers={'Accept': 'application/json'}
+        )
+        if req.status_code == 200:
+            data = req.json()
+            logger.debug('[FALLBACK] Construction config for hash {} found.\n{}'.format(construction_hash, json.dumps(data, indent=4, sort_keys=True)))
+            print('Found construction config with id {} for hash {} '.format(data['id'], construction_hash))
+            return data['id']
+        if req.status_code == 404:
+            logger.debug('[FALLBACK] Construction config for hash {} not found.'.format(construction_hash))
+            return None
+        else:
+            logger.error('Error while fetching construction config fallback {} | Response: {}'
+                         .format(construction_hash, req.json()))
+            raise Exception('Error while fetching construction config fallback {} '.format(construction_hash))
